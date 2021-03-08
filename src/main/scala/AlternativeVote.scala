@@ -9,6 +9,9 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
 
   private val noTie: Any => Nothing = x => throw new Error(s"there should not be a tie: $x")
 
+  def invalidCandidates(validCandidates: Set[Candidate]): Set[Candidate] =
+    originalVoteLists.flatten.toSet -- validCandidates
+
   def randomTieBreaking(set: Set[Candidate]): Set[Candidate] = {
     dbg("WARN: Random tie breaking!")
     set - (set.toSeq.sortBy(_.toString).toSeq(rnd.nextInt(set.size)))
@@ -26,8 +29,7 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
       case byNumOfVotes if byNumOfVotes.sizeIs > 1 =>
         dbg(s"tieBreaking: There were different numbers of overall votes: ${byNumOfVotes.view.mapValues(_.toSeq).toMap}")
         byNumOfVotes.maxBy(_._1)._2.toSet
-      case m =>
-        println(m)
+      case _ =>
         randomTieBreaking(criticalCandidates)
     }
 
@@ -38,7 +40,7 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
       .view.mapValues(_.size)
       .toMap.withDefaultValue(0)
 
-  def dbg(s: => String) = println(s)
+  def dbg(s: => String) = () // println(s)
 
   @tailrec
   final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,

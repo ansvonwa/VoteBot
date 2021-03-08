@@ -64,4 +64,12 @@ class TestAlternativeVote {
     assertEquals("a", AlternativeVote(voteLists("a,ab,ba,ba,c")).getWinner())
   }
 
+  @Test def t13(): Unit = {
+    assertEquals(Set(), AlternativeVote(voteLists("a,ab,ba,ba,c")).invalidCandidates(candidates("abc").toSet))
+  }
+
+  @Test def t14(): Unit = {
+    assertEquals(Set(candidate("d")), AlternativeVote(voteLists("a,ab,bad,ba,c")).invalidCandidates(candidates("abc").toSet))
+  }
+
 }
