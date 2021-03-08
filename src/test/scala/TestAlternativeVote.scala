@@ -35,18 +35,22 @@ class TestAlternativeVote {
   }
 
   @Test def t5(): Unit = {
-    assertEquals("e", abc.getWinner(voteLists("a,b,c"), _ => candidate("e")))
+    assertEquals("c", abc.getWinner(voteLists("a,b,c"), _ => Set(candidate("c"))))
   }
 
   @Test def t6(): Unit = {
-    assertEquals("e", abc.getWinner(voteLists("a,ba,cba"), _ => candidate("e")))
+    assertEquals("a", abc.getWinner(voteLists("a,ba,cba"), _ => Set(candidate("a"), candidate("c"))))
   }
 
   @Test def t7(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("ba,bc,ca,da,ea"), noTie))
+    assertEquals("b", abc.getWinner(voteLists("ba,bc,ca,da,ea"), noTie))
   }
 
   @Test def t8(): Unit = {
+    assertEquals("a", abc.getWinner(voteLists("ba,bc,ca,da,ea,ab,ab"), noTie))
+  }
+
+  @Test def t9(): Unit = {
     assertEquals("a", abc.getWinner(voteLists("a,a,a"), noTie))
   }
 
