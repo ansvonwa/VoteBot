@@ -72,4 +72,15 @@ class TestAlternativeVote {
     assertEquals(Set(candidate("d")), AlternativeVote(voteLists("a,ab,bad,ba,c")).invalidCandidates(candidates("abc").toSet))
   }
 
+  @Test def rnd1(): Unit = {
+    def rndSeq(seed: Int) = scala.util.Random(seed).alphanumeric.map {
+      case c if c <= '9' => ','
+      case c => c.toLower
+    }.take(500).mkString("")
+
+    "uoozbnhfycihpnuedkvdcugj".zipWithIndex.foreach {
+      case (c, i) =>
+        assertEquals(c.toString, AlternativeVote(voteLists(rndSeq(i))).getWinner())
+    }
+  }
 }

@@ -4,10 +4,10 @@ import scala.annotation.tailrec
 import scala.util.Random
 
 class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
-  originalVoteLists = originalVoteLists.sortBy(_.hashCode) // order should never depend on input order!
+  originalVoteLists = originalVoteLists
+    .map(_.distinct) // should not have same candidate multiple times on list!
+    .sortBy(_.hashCode) // order should never depend on input order!
   val rnd = new Random(originalVoteLists.map(_.toString).sorted.toString.hashCode) // let the seed depend on the input
-
-  private val noTie: Any => Nothing = x => throw new Error(s"there should not be a tie: $x")
 
   def invalidCandidates(validCandidates: Set[Candidate]): Set[Candidate] =
     originalVoteLists.flatten.toSet -- validCandidates
