@@ -3,8 +3,33 @@ import AlternativeVote.Candidate
 import scala.annotation.tailrec
 import scala.util.Random
 
-class AlternativeVote(candidates: Set[Candidate]) {
-  val rnd = Random(0)
+class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
+  originalVoteLists = originalVoteLists.sortBy(_.hashCode) // order should never depend on input order!
+  val rnd = new Random(originalVoteLists.map(_.toString).sorted.toString.hashCode) // let the seed depend on the input
+
+  private val noTie: Any => Nothing = x => throw new Error(s"there should not be a tie: $x")
+
+  def randomTieBreaking(set: Set[Candidate]): Set[Candidate] = {
+    dbg("WARN: Random tie breaking!")
+    set - (set.toSeq.sortBy(_.toString).toSeq(rnd.nextInt(set.size)))
+  }
+
+  def tieBreakingByOverallVotes(criticalCandidates: Set[Candidate]): Set[Candidate] =
+    originalVoteLists
+      .flatMap(_.filter(criticalCandidates))
+      .groupBy(identity)
+      .view.mapValues(_.size)
+      .groupBy(_._2)
+      .view.mapValues(_.map(_._1))
+      .toMap
+    match {
+      case byNumOfVotes if byNumOfVotes.sizeIs > 1 =>
+        dbg(s"tieBreaking: There were different numbers of overall votes: ${byNumOfVotes.view.mapValues(_.toSeq).toMap}")
+        byNumOfVotes.maxBy(_._1)._2.toSet
+      case m =>
+        println(m)
+        randomTieBreaking(criticalCandidates)
+    }
 
   def getCurVotes(voteLists: Seq[Seq[Candidate]]): Map[Candidate, Int] =
     voteLists.toSeq
@@ -16,8 +41,8 @@ class AlternativeVote(candidates: Set[Candidate]) {
   def dbg(s: => String) = println(s)
 
   @tailrec
-  final def getWinner(voteLists: Seq[Seq[Candidate]],
-                      tieBreaking: Set[Candidate] => Set[Candidate] = set => set - set.toSeq(rnd.nextInt(set.size))
+  final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,
+                      tieBreaking: Set[Candidate] => Set[Candidate] = tieBreakingByOverallVotes
                      ): Candidate = {
     voteLists.reduce(_ ++ _).distinct match {
       case Seq(winner) => winner
@@ -32,9 +57,9 @@ class AlternativeVote(candidates: Set[Candidate]) {
         dbg(s"leastVotes: $leastVotes; kicking out ${remainingCandidates.filter(curVotes(_) == leastVotes).mkString(", ")}")
         dbg(s"remainingVotes: $remainingVotes")
         if (remainingVotes.forall(_.isEmpty)) {
+          dbg(s"tieBreaking: All remaining candidates (${remainingCandidates.mkString(", ")}) have $leastVotes votes.")
           val keptCandidates: Set[Candidate] = tieBreaking(remainingCandidates.toSet)
-          dbg(s"WARN: All candidates (${remainingCandidates.mkString(", ")}) have $leastVotes votes now.")
-          dbg(s"WARN: ${remainingCandidates.toSet -- keptCandidates} was/were removed by tieBreaking algorithm. $keptCandidates was/were kept.")
+          dbg(s"tieBreaking: ${remainingCandidates.toSet -- keptCandidates} was removed by tieBreaking algorithm. $keptCandidates was kept.")
           assert(keptCandidates.nonEmpty)
           assert(keptCandidates != remainingCandidates.toSet)
           assert(keptCandidates subsetOf remainingCandidates.toSet)

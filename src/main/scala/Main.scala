@@ -10,9 +10,9 @@ object Main {
     s.map((c: Char) => candidate(c.toString)).toSeq
 
   def main(args: Array[String]): Unit = {
-    val av = AlternativeVote(candidates("ab").toSet)
-    println(av.getWinner(voteLists("a,ab"), _ => throw new Error))
-    println(av.getWinner(voteLists("a,a,ab,abc"), _ => throw new Error))
+    println(AlternativeVote(voteLists("a,ab")).getWinner(tieBreaking = _ => throw new Error))
+    println(AlternativeVote(voteLists("a,a,ab,abc")).getWinner(tieBreaking = _ => throw new Error))
+    println(AlternativeVote(voteLists("a,a,ba,bac")).getWinner())
   }
 
   def msg = "I was compiled by dotty :)"

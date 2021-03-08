@@ -14,44 +14,54 @@ class TestAlternativeVote {
   def candidates(s: String): Seq[Candidate] =
     s.map((c: Char) => candidate(c.toString)).toSeq
 
-  val abc = new AlternativeVote(candidates("abc").toSet)
-
   val noTie: Any => Nothing = x => throw new Error(s"there should not be a tie: $x")
 
   @Test def t1(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("a,a,ab,abc"), noTie))
+    assertEquals("a", AlternativeVote(voteLists("a,a,ab,abc")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t2(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("a,ab,cba"), noTie))
+    assertEquals("a", AlternativeVote(voteLists("a,ab,cba")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t3(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("a,ba,abc"), noTie))
+    assertEquals("a", AlternativeVote(voteLists("a,ba,abc")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t4(): Unit = {
-    assertEquals("b", abc.getWinner(voteLists("a,ba,bca"), noTie))
+    assertEquals("b", AlternativeVote(voteLists("a,ba,bca")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t5(): Unit = {
-    assertEquals("c", abc.getWinner(voteLists("a,b,c"), _ => Set(candidate("c"))))
+    assertEquals("c", AlternativeVote(voteLists("a,b,c")).getWinner(tieBreaking = _ => Set(candidate("c"))))
   }
 
   @Test def t6(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("a,ba,cba"), _ => Set(candidate("a"), candidate("c"))))
+    assertEquals("a", AlternativeVote(voteLists("a,ba,cba")).getWinner(tieBreaking = _ => Set(candidate("a"), candidate("c"))))
   }
 
   @Test def t7(): Unit = {
-    assertEquals("b", abc.getWinner(voteLists("ba,bc,ca,da,ea"), noTie))
+    assertEquals("b", AlternativeVote(voteLists("ba,bc,ca,da,ea")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t8(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("ba,bc,ca,da,ea,ab,ab"), noTie))
+    assertEquals("a", AlternativeVote(voteLists("ba,bc,ca,da,ea,ab,ab")).getWinner(tieBreaking = noTie))
   }
 
   @Test def t9(): Unit = {
-    assertEquals("a", abc.getWinner(voteLists("a,a,a"), noTie))
+    assertEquals("a", AlternativeVote(voteLists("a,a,a")).getWinner(tieBreaking = noTie))
+  }
+
+  @Test def t10(): Unit = {
+    assertEquals("a", AlternativeVote(voteLists("a,a,ba,bac")).getWinner())
+  }
+
+  @Test def t11(): Unit = {
+    assertEquals("a", AlternativeVote(voteLists("a,ba,c")).getWinner())
+  }
+
+  @Test def t12(): Unit = {
+    assertEquals("a", AlternativeVote(voteLists("a,ab,ba,ba,c")).getWinner())
   }
 
 }
