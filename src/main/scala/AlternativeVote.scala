@@ -12,26 +12,41 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
   def invalidCandidates(validCandidates: Set[Candidate]): Set[Candidate] =
     originalVoteLists.flatten.toSet -- validCandidates
 
-  def randomTieBreaking(set: Set[Candidate]): Set[Candidate] = {
-    dbg("WARN: Random tie breaking!")
-    set - (set.toSeq.sortBy(_.toString).toSeq(rnd.nextInt(set.size)))
-  }
+  var randomTieBreaking: Set[Candidate] => Set[Candidate] =
+    (set: Set[Candidate]) => {
+      warn(s"Random tie breaking between $set!")
+      set - (set.toSeq.sortBy(_.toString).toSeq(rnd.nextInt(set.size)))
+    }
 
-  def tieBreakingByOverallVotes(criticalCandidates: Set[Candidate]): Set[Candidate] =
-    originalVoteLists
-      .flatMap(_.filter(criticalCandidates))
-      .groupBy(identity)
-      .view.mapValues(_.size)
-      .groupBy(_._2)
-      .view.mapValues(_.map(_._1))
-      .toMap
-    match {
-      case byNumOfVotes if byNumOfVotes.sizeIs > 1 =>
+  def tieBreakingByOverallVotes(criticalCandidates: Set[Candidate]): Set[Candidate] = {
+    def byCount(vl: Seq[Candidate]): Map[Int, Iterable[Candidate]] =
+      vl
+        .filter(criticalCandidates)
+        .groupBy(identity)
+        .view.mapValues(_.size)
+        .groupBy(_._2)
+        .view.mapValues(_.map(_._1))
+        .toMap
+    byCount(originalVoteLists.flatten) match {
+      case byNumOfVotes if byNumOfVotes.sizeIs > 1 => // if candidates occur different number of times, we have a criterion!
         dbg(s"tieBreaking: There were different numbers of overall votes: ${byNumOfVotes.view.mapValues(_.toSeq).toMap}")
         byNumOfVotes.maxBy(_._1)._2.toSet
-      case _ =>
-        randomTieBreaking(criticalCandidates)
+      case _ => // try cutting off lists at the lists ends, so we may get different results
+        val longestVLSize = originalVoteLists.map(_.size).max
+        (1 until longestVLSize).reverse.map { length =>
+          byCount(originalVoteLists.flatMap(_.take(length)))
+        }.find(_.sizeIs > 1) match {
+          case Some(map) =>
+            dbg(s"tieBreaking: After cutting off the ends of the voting lists, there were different numbers of overall votes: ${map.view.mapValues(_.toSeq).toMap}")
+            map.maxBy(_._1)._2.toSet
+          case None =>
+            Console.err.println(originalVoteLists)
+            Console.err.println("  " + originalVoteLists.map(_.filter(criticalCandidates)))
+//            println(bnov.mapValues(_.toSet).toMap)
+            randomTieBreaking(criticalCandidates)
+        }
     }
+  }
 
   def getCurVotes(voteLists: Seq[Seq[Candidate]]): Map[Candidate, Int] =
     voteLists.toSeq
@@ -40,7 +55,8 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
       .view.mapValues(_.size)
       .toMap.withDefaultValue(0)
 
-  def dbg(s: => String) = () // println(s)
+  inline def dbg(inline s: => String) = () // println(s)
+  inline def warn(inline s: => String) = Console.err.println(s)
 
   @tailrec
   final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,
@@ -62,9 +78,8 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
           dbg(s"tieBreaking: All remaining candidates (${remainingCandidates.mkString(", ")}) have $leastVotes votes.")
           val keptCandidates: Set[Candidate] = tieBreaking(remainingCandidates.toSet)
           dbg(s"tieBreaking: ${remainingCandidates.toSet -- keptCandidates} was removed by tieBreaking algorithm. $keptCandidates was kept.")
-          assert(keptCandidates.nonEmpty)
-          assert(keptCandidates != remainingCandidates.toSet)
-          assert(keptCandidates subsetOf remainingCandidates.toSet)
+          assert(keptCandidates.nonEmpty && keptCandidates != remainingCandidates.toSet && keptCandidates.subsetOf(remainingCandidates.toSet),
+            "tie breaking must return a proper subset of the given candidates!")
           getWinner(voteLists.map(_.filter(keptCandidates)), tieBreaking)
         } else {
           getWinner(remainingVotes, tieBreaking)
