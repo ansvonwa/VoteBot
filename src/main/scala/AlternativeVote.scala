@@ -55,8 +55,8 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
       .view.mapValues(_.size)
       .toMap.withDefaultValue(0)
 
-  inline def dbg(inline s: => String) = () // println(s)
-  inline def warn(inline s: => String) = Console.err.println(s)
+  @inline def dbg(s: => String) = () // println(s)
+  @inline def warn(s: => String) = Console.err.println(s)
 
   @tailrec
   final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,
@@ -89,6 +89,6 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
 }
 
 object AlternativeVote {
-  opaque type Candidate = String
+  /*opaque*/ type Candidate = String
   def candidate(s: String): Candidate = s
 }

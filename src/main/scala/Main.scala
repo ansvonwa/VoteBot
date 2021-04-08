@@ -21,8 +21,8 @@ object Main {
           .map(AlternativeVote.candidate))
 
   def main(args: Array[String]): Unit = {
-    val file = new File(if args.size >= 1 then args(0) else "vote_lists.json")
-    val num = if args.size >= 2 then args(1).toInt else 5
+    val file = new File(if (args.size >= 1) args(0) else "vote_lists.json")
+    val num = if (args.size >= 2) args(1).toInt else 5
     val voteLists = readVoteLists(file)
     println(voteLists)
     val vote = new IterativeAlternativeVote(voteLists)

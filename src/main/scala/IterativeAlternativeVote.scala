@@ -7,8 +7,8 @@ class IterativeAlternativeVote(var voteLists: Seq[Seq[Candidate]]) {
   
   def winners: LazyList[Candidate] = {
     try {
-      val winner = AlternativeVote(voteLists).getWinner()
-      winner #:: IterativeAlternativeVote(voteLists.map(_.filter(_ != winner))).winners
+      val winner = new AlternativeVote(voteLists).getWinner()
+      winner #:: new IterativeAlternativeVote(voteLists.map(_.filter(_ != winner))).winners
     } catch {
       case _: NoSuchElementException => LazyList()
     }
