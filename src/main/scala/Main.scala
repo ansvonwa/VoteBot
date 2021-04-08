@@ -1,31 +1,31 @@
 import AlternativeVote.{Candidate, candidate}
 
+import java.io.File
+import scala.io.Source
 import scala.util.Random
 
 object Main {
 
-  def voteLists(s: String): Seq[Seq[Candidate]] =
-    s.split(",").toSeq
-      .map(candidates)
-
-  def candidates(s: String): Seq[Candidate] =
-    s.map((c: Char) => candidate(c.toString)).toSeq
+  def readVoteLists(file: File): Seq[Seq[Candidate]] =
+    Source.fromFile(file)
+      .getLines()
+      .mkString("")
+      .replaceAll(" +", "")
+      .split("\\],\\[")
+      .toVector
+      .map(
+        _.split(",")
+          .toVector
+          .map(_.replaceAll("[\\[\\]\\\"]", ""))
+          .filter(_.nonEmpty)
+          .map(AlternativeVote.candidate))
 
   def main(args: Array[String]): Unit = {
-    println(AlternativeVote(voteLists("a,ab")).getWinner(tieBreaking = _ => throw new Error))
-    println(AlternativeVote(voteLists("a,a,ab,abc")).getWinner(tieBreaking = _ => throw new Error))
-    println(AlternativeVote(voteLists("a,a,ba,bac")).getWinner())
-
-    val s = Random(3).alphanumeric.map {
-      case c if c <= '9' => ','
-      case c => c.toLower
-    }.take(500).mkString("")
-    println(s)
-    println(AlternativeVote(voteLists(s)).getWinner())
-
-    println(IterativeAlternativeVote(voteLists(s)).winners.toVector)
+    val file = new File(if args.size >= 1 then args(0) else "vote_lists.json")
+    val num = if args.size >= 2 then args(1).toInt else 5
+    val voteLists = readVoteLists(file)
+    println(voteLists)
+    val vote = new IterativeAlternativeVote(voteLists)
+    println(vote.winners.take(num).toVector)
   }
-
-  def msg = "I was compiled by dotty :)"
-
 }
