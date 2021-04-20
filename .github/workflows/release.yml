@@ -19,21 +19,9 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
-    - name: dbg1
-      run: sbt version
-
-    - name: dbg3
-      run: sbt version | tail -n2 | head -n1
-
-    - name: dbg4
-      run: sbt version | tail -n2 | head -n1 | sed 's/^.* /v/'
-
     - name: Create tag
       id: create_tag
-      run: echo ::set-output name=tag::$(sbt version | tail -n2 | head -n1 | sed 's/^.* /v/')
-
-    - name: dbg
-      run: echo ${{ steps.create_tag.outputs.tag }}
+      run: echo ::set-output name=tag::$(sbt version | tail -n2 | head -n1 | sed 's/^.* //')
 
     - name: Compile for release
       run: sbt 'set nativeMode := "release-fast"; nativeLink'
