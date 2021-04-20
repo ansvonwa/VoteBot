@@ -24,7 +24,7 @@ jobs:
 
     - name: Create tag
       id: create_tag
-      run: echo ::set-output name=tag::$(sbt version | tail -n1 | sed 's/^.* /v/')
+      run: echo ::set-output name=tag::$(sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/')
 
     - name: dbg
       run: echo ${{ steps.create_tag.outputs.tag }}
