@@ -26,17 +26,17 @@ jobs:
       run: sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$"
 
     - name: dbg3
-      run: sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$"
+      run: sbt version | tail -n2 | head -n1
 
     - name: dbg5
       run: sbt version | grep -E "\[info\] [0-9]+\.[0-9]+\.[0-9]+"
 
     - name: dbg4
-      run: sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/'
+      run: sbt version | tail -n2 | head -n1 | sed 's/^.* /v/'
 
     - name: Create tag
       id: create_tag
-      run: echo ::set-output name=tag::$(sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$" | sed 's/^.* /v/')
+      run: echo ::set-output name=tag::$(sbt version | tail -n2 | head -n1 | sed 's/^.* /v/')
 
     - name: dbg
       run: echo ${{ steps.create_tag.outputs.tag }}
