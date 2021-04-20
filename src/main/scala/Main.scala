@@ -1,24 +1,26 @@
-import AlternativeVote.{Candidate, candidate}
+import AlternativeVote.Candidate
 
 import java.io.File
 import scala.io.Source
-import scala.util.Random
 
 object Main {
 
-  def readVoteLists(file: File): Seq[Seq[Candidate]] =
-    Source.fromFile(file)
-      .getLines()
+  def readVoteLists(file: File): Seq[Seq[Candidate]] = {
+    val source = Source.fromFile(file)
+    val res = source.getLines()
       .mkString("")
       .replaceAll(" +", "")
-      .split("\\],\\[")
+      .split("],\\[")
       .toVector
       .map(
         _.split(",")
           .toVector
-          .map(_.replaceAll("[\\[\\]\\\"]", ""))
+          .map(_.replaceAll("[\\[\\]\"']", ""))
           .filter(_.nonEmpty)
           .map(AlternativeVote.candidate))
+    source.close()
+    res
+  }
 
   def main(args: Array[String]): Unit = {
     val file = new File(if (args.size >= 1) args(0) else "vote_lists.json")

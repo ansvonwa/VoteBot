@@ -15,7 +15,7 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
   var randomTieBreaking: Set[Candidate] => Set[Candidate] =
     (set: Set[Candidate]) => {
       warn(s"Random tie breaking between $set!")
-      set - (set.toSeq.sortBy(_.toString).toSeq(rnd.nextInt(set.size)))
+      set - set.toSeq.sortBy(_.toString).apply(rnd.nextInt(set.size))
     }
 
   def tieBreakingByOverallVotes(criticalCandidates: Set[Candidate]): Set[Candidate] = {
@@ -42,21 +42,20 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
           case None =>
             Console.err.println(originalVoteLists)
             Console.err.println("  " + originalVoteLists.map(_.filter(criticalCandidates)))
-//            println(bnov.mapValues(_.toSet).toMap)
             randomTieBreaking(criticalCandidates)
         }
     }
   }
 
   def getCurVotes(voteLists: Seq[Seq[Candidate]]): Map[Candidate, Int] =
-    voteLists.toSeq
+    voteLists
       .flatMap(_.headOption)
       .groupBy(identity)
       .view.mapValues(_.size)
       .toMap.withDefaultValue(0)
 
-  @inline def dbg(s: => String) = () // println(s)
-  @inline def warn(s: => String) = Console.err.println(s)
+  @inline def dbg(s: => String): Unit = () // println(s)
+  @inline def warn(s: => String): Unit = Console.err.println(s)
 
   @tailrec
   final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,
