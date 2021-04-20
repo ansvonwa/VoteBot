@@ -22,14 +22,8 @@ jobs:
     - name: dbg1
       run: sbt version
 
-    - name: dbg2
-      run: sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$"
-
     - name: dbg3
       run: sbt version | tail -n2 | head -n1
-
-    - name: dbg5
-      run: sbt version | grep -E "\[info\] [0-9]+\.[0-9]+\.[0-9]+"
 
     - name: dbg4
       run: sbt version | tail -n2 | head -n1 | sed 's/^.* /v/'
