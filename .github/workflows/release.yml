@@ -23,20 +23,20 @@ jobs:
       run: sbt version
 
     - name: dbg2
-      run: sbt version | grep -v "^$"
+      run: sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$"
 
     - name: dbg3
-      run: sbt version | grep -v "^$" | tail -n2
+      run: sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$"
 
     - name: dbg5
-      run: echo -e "a\nb\n\nc" | grep -v "^$" | tail -n1
+      run: sbt version | grep -E "\[info\] [0-9]+\.[0-9]+\.[0-9]+"
 
     - name: dbg4
       run: sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/'
 
     - name: Create tag
       id: create_tag
-      run: echo ::set-output name=tag::$(sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/')
+      run: echo ::set-output name=tag::$(sbt version | grep -E "^\[info\] [0-9]+\.[0-9]+\.[0-9]+$" | sed 's/^.* /v/')
 
     - name: dbg
       run: echo ${{ steps.create_tag.outputs.tag }}
