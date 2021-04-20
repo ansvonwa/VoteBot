@@ -4,7 +4,7 @@ val scala2Version = "2.13.5"
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 enablePlugins(ScalaNativePlugin)
-addCompilerPlugin("org.scala-native" % "junit-plugin" % "0.4.0" cross CrossVersion.full)
+addSbtPlugin("org.scala-native" % "junit-plugin" % "0.4.0" % scala2Version)
 
 lazy val root = project
   .in(file("."))
