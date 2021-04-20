@@ -22,6 +22,15 @@ jobs:
     - name: dbg1
       run: sbt version
 
+    - name: dbg2
+      run: sbt version | grep -v "^$"
+
+    - name: dbg3
+      run: sbt version | grep -v "^$" | tail -n1
+
+    - name: dbg4
+      run: sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/'
+
     - name: Create tag
       id: create_tag
       run: echo ::set-output name=tag::$(sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/')
