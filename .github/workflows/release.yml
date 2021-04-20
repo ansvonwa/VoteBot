@@ -19,17 +19,18 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
-    - name: Compile for release
-      run: sbt 'set nativeMode := "release-fast"; nativeLink'
+    - name: dbg1
+      run: sbt version
 
     - name: Create tag
       id: create_tag
-      run: |
-        tag=$(sbt version | tail -n1 | sed 's/^.* /v/')
-        echo ::set-output name=tag::$tag
+      run: echo ::set-output name=tag::$(sbt version | tail -n1 | sed 's/^.* /v/')
 
     - name: dbg
       run: echo ${{ steps.create_tag.outputs.tag }}
+
+    - name: Compile for release
+      run: sbt 'set nativeMode := "release-fast"; nativeLink'
 
     - name: Create Draft Release
       id: create_release
