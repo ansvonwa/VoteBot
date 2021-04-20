@@ -26,7 +26,10 @@ jobs:
       run: sbt version | grep -v "^$"
 
     - name: dbg3
-      run: sbt version | grep -v "^$" | tail -n1
+      run: sbt version | grep -v "^$" | tail -n2
+
+    - name: dbg5
+      run: echo -e "a\nb\n\nc" | grep -v "^$" | tail -n1
 
     - name: dbg4
       run: sbt version | grep -v "^$" | tail -n1 | sed 's/^.* /v/'
