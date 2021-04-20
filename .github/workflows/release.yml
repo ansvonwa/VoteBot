@@ -1,4 +1,4 @@
-name: Scala CI Release
+name: Release
 
 on:
   push:
@@ -24,14 +24,20 @@ jobs:
     - name: Compile for release
       run: sbt 'set nativeMode := "release-fast"; nativeLink'
 
+    - name: Create tag
+      id: create_tag
+      run: |
+        tag=$(sbt version | tail -n1 | sed 's/^.* /v/')
+        echo "::set-output name=tag::$tag"
+
     - name: Create Draft Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: '0.1.0'
-        release_name: 'Alternative Vote Bot'
+        tag_name:  ${{ steps.create_tag.outputs.tag }}
+        release_name: Alternative Vote Bot ${{ steps.create_tag.outputs.tag }}
         draft: true
         prerelease: false
 
