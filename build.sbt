@@ -16,6 +16,6 @@ lazy val root = project
 
     nativeLinkStubs := true,
 
-    libraryDependencies += "org.scala-native" %%% "junit-runtime" % "0.4.0" % "test",
+    libraryDependencies += "org.scala-native" %%% "junit-runtime" % "0.4.0" //% "test",
 //    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
   )
