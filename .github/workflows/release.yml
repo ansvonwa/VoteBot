@@ -34,8 +34,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.create_tag.output.tag }}
-        release_name: Alternative Vote Bot ${{ steps.create_tag.output.tag }}
+        tag_name: ${{ steps.create_tag.outputs.tag }}
+        release_name: Alternative Vote Bot ${{ steps.create_tag.outputs.tag }}
         draft: true
         prerelease: false
 
