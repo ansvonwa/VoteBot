@@ -34,6 +34,7 @@ jobs:
       with:
         tag_name: ${{ steps.create_tag.outputs.tag }}
         release_name: Alternative Vote Bot ${{ steps.create_tag.outputs.tag }}
+        body: Build version ${{ steps.create_tag.outputs.tag }}
         draft: true
         prerelease: false
 
