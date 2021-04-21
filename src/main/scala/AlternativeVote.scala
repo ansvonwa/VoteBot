@@ -61,14 +61,14 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
   final def getWinner(voteLists: Seq[Seq[Candidate]] = originalVoteLists,
                       tieBreaking: Set[Candidate] => Set[Candidate] = tieBreakingByOverallVotes
                      ): Candidate = {
-    voteLists.reduce(_ ++ _).distinct match {
+    voteLists.flatten.distinct match {
       case Seq(winner) => winner
       case Seq() => throw new NoSuchElementException("Can't make up a winner from an empty list 🤷")
       case remainingCandidates: Seq[Candidate] =>
-        val curVotes = getCurVotes(voteLists)
+        val curVotes: Map[Candidate, Int] = getCurVotes(voteLists)
         val leastVotes: Int = remainingCandidates.map(curVotes).min
         val remainingVotes: Seq[Seq[Candidate]] = voteLists.map(_.filter(curVotes(_) > leastVotes))
-        dbg(s"=========== Another Round ===========")
+        dbg(s"=========== Round Start ===========")
         dbg(s"voteLists: $voteLists")
         dbg(s"curVotes: $curVotes")
         dbg(s"leastVotes: $leastVotes; kicking out ${remainingCandidates.filter(curVotes(_) == leastVotes).mkString(", ")}")
@@ -78,7 +78,7 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
           val keptCandidates: Set[Candidate] = tieBreaking(remainingCandidates.toSet)
           dbg(s"tieBreaking: ${remainingCandidates.toSet -- keptCandidates} was removed by tieBreaking algorithm. $keptCandidates was kept.")
           assert(keptCandidates.nonEmpty && keptCandidates != remainingCandidates.toSet && keptCandidates.subsetOf(remainingCandidates.toSet),
-            "tie breaking must return a proper subset of the given candidates!")
+            "tie breaking must return a non-empty proper subset of the given candidates!")
           getWinner(voteLists.map(_.filter(keptCandidates)), tieBreaking)
         } else {
           getWinner(remainingVotes, tieBreaking)

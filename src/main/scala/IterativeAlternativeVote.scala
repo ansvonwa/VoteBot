@@ -6,7 +6,7 @@ class IterativeAlternativeVote(var voteLists: Seq[Seq[Candidate]]) {
     .sortBy(_.hashCode) // order should never depend on input order!
 
   def winners: LazyList[Candidate] = {
-    if (voteLists.flatten.isEmpty) LazyList()
+    if (voteLists.forall(_.isEmpty)) LazyList()
     else {
       val winner = new AlternativeVote(voteLists).getWinner()
       winner #:: new IterativeAlternativeVote(voteLists.map(_.filter(_ != winner))).winners
