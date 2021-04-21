@@ -24,7 +24,7 @@ jobs:
       run: echo ::set-output name=tag::$(sbt version --no-colors | tail -n1 | sed 's/^.* /v/')
 
     - name: Compile for release
-      run: sbt 'set nativeMode := "release-fast"; nativeLink'
+      run: sbt 'set nativeMode := "release-full"; nativeLink'
 
     - name: Create Draft Release
       id: create_release

@@ -10,7 +10,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "votebot",
-    version := "0.1.2",
+    version := "0.1.3",
 
     scalaVersion := scala2Version,
 
