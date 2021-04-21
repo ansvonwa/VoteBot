@@ -14,8 +14,10 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
 
   var randomTieBreaking: Set[Candidate] => Set[Candidate] =
     (set: Set[Candidate]) => {
-      warn(s"Random tie breaking between $set!")
-      set - set.toSeq.sortBy(_.toString).apply(rnd.nextInt(set.size))
+      assert(set.nonEmpty)
+      val removed = set.toSeq.sortBy(_.toString).apply(rnd.nextInt(set.size))
+      warn(s"Random tie breaking between $set, removed $removed")
+      set - removed
     }
 
   def tieBreakingByOverallVotes(criticalCandidates: Set[Candidate]): Set[Candidate] = {
@@ -40,8 +42,6 @@ class AlternativeVote(var originalVoteLists: Seq[Seq[Candidate]]) {
             dbg(s"tieBreaking: After cutting off the ends of the voting lists, there were different numbers of overall votes: ${map.view.mapValues(_.toSeq).toMap}")
             map.maxBy(_._1)._2.toSet
           case None =>
-            Console.err.println(originalVoteLists)
-            Console.err.println("  " + originalVoteLists.map(_.filter(criticalCandidates)))
             randomTieBreaking(criticalCandidates)
         }
     }
