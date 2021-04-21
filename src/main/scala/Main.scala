@@ -24,9 +24,20 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val file = new File(if (args.size >= 1) args(0) else "vote_lists.json")
-    val num = if (args.size >= 2) args(1).toInt else 5
+    val num = if (args.size >= 2) args(1).toInt match {
+      case x if x >= 0 => x
+      case _ => Int.MaxValue
+    } else 5
+    if (!file.exists()) {
+      println(
+        "usage: votebot <vote_lists> [num]\n" +
+          "\n" +
+          "vote_lists  A .json-file containing a list of lists of names of votes.\n" +
+          "            Format: [['candidateA', ...], ...]\n" +
+          "num         The number of winners to print. Default: 5")
+      System.exit(1)
+    }
     val voteLists = readVoteLists(file)
-    println(voteLists)
     val vote = new IterativeAlternativeVote(voteLists)
     println(vote.winners.take(num).toVector)
   }
