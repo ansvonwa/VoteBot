@@ -30,7 +30,7 @@ object Main {
     } else 5
     if (!file.exists()) {
       println(
-        "usage: votebot <vote_lists> [num]\n" +
+        "usage: votebot vote_lists [num]\n" +
           "\n" +
           "vote_lists  A .json-file containing a list of lists of names of votes.\n" +
           "            Format: [['candidateA', ...], ...]\n" +
@@ -39,6 +39,6 @@ object Main {
     }
     val voteLists = readVoteLists(file)
     val vote = new IterativeAlternativeVote(voteLists)
-    println(vote.winners.take(num).toVector)
+    println(vote.winners.take(num).toVector.map("\"" + _ + "\"").mkString("[", ", ", "]"))
   }
 }
