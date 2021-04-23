@@ -3,6 +3,9 @@ import AlternativeVote.{Candidate, candidate}
 import org.junit.Test
 import org.junit.Assert._
 
+import java.util.NoSuchElementException
+import scala.util.{Failure, Try}
+
 class TestAlternativeVote {
   /**
    * turns "ab,ac,bcd" into Set(Seq(a, b), Seq(a, c), Seq(b, c, d))
@@ -70,6 +73,13 @@ class TestAlternativeVote {
 
   @Test def t14(): Unit = {
     assertEquals(Set(candidate("d")), new AlternativeVote(voteLists("a,ab,bad,ba,c")).invalidCandidates(candidates("abc").toSet))
+  }
+
+  @Test def t15(): Unit = {
+    assert(Try(new AlternativeVote(voteLists("")).getWinner()) match {
+      case Failure(noSuchElementException: NoSuchElementException) if noSuchElementException.getMessage.contains("Can't make up a winner from an empty list") => true
+      case _ => false
+    })
   }
 
   @Test def rnd1(): Unit = {
